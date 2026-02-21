@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bluff Royal — Test Client</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-2: #242836;
+            --accent: #7c5cfc;
+            --accent-glow: rgba(124, 92, 252, .35);
+            --red: #ff4d6a;
+            --green: #2ee89e;
+            --gold: #f5c542;
+            --text: #e4e4ed;
+            --muted: #6b6f82;
+            --border: #2e3245;
+            --radius: 10px;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 24px 0 8px;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: .85rem;
+            margin-bottom: 20px;
+        }
+
+        /* ── Panels ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            width: 100%;
+            max-width: 720px;
+            margin-bottom: 14px;
+        }
+
+        .panel-title {
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        /* ── Connection ── */
+        #connection-panel {
+            max-width: 420px;
+        }
+
+        #connection-panel label {
+            display: block;
+            font-size: .85rem;
+            color: var(--muted);
+            margin: 8px 0 4px;
+        }
+
+        #connection-panel input {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: .9rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        #connection-panel input:focus {
+            border-color: var(--accent);
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .85rem;
+            transition: transform .1s, box-shadow .2s;
+        }
+
+        .btn:active {
+            transform: scale(.97);
+        }
+
+        .btn:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 16px var(--accent-glow);
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: var(--bg);
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: var(--bg);
+        }
+
+        .btn-muted {
+            background: var(--surface-2);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            box-shadow: 0 0 28px var(--accent-glow);
+        }
+
+        /* ── Game area ── */
+        #game-area {
+            display: none;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        /* Info bar */
+        .info-bar {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .info-chip {
+            background: var(--surface-2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: .82rem;
+        }
+
+        .info-chip b {
+            color: var(--accent);
+        }
+
+        .info-chip.timer b {
+            color: var(--red);
+        }
+
+        /* Table center */
+        .table-center {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .face-down-stack {
+            display: flex;
+            gap: -8px;
+        }
+
+        .face-down-card {
+            width: 40px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent), #4a32b0);
+            border-radius: 5px;
+            border: 2px solid var(--border);
+            margin-left: -8px;
+        }
+
+        .face-down-card:first-child {
+            margin-left: 0;
+        }
+
+        .claim-badge {
+            background: var(--surface-2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--gold);
+            font-size: .88rem;
+        }
+
+        .claim-badge b {
+            color: var(--gold);
+        }
+
+        .no-trick {
+            color: var(--muted);
+            font-style: italic;
+            font-size: .85rem;
+        }
+
+        /* Hand */
+        .hand-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .card {
+            width: 60px;
+            height: 84px;
+            background: #fff;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform .15s, border-color .15s, box-shadow .15s;
+            user-select: none;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow);
+            transform: translateY(-6px);
+        }
+
+        .card .card-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a1d27;
+        }
+
+        .card .card-suit {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .card.red .card-value,
+        .card.red .card-suit {
+            color: #d32f2f;
+        }
+
+        .card.black .card-value,
+        .card.black .card-suit {
+            color: #1a1d27;
+        }
+
+        .empty-hand {
+            color: var(--muted);
+            font-style: italic;
+            font-size: .85rem;
+        }
+
+        /* Actions */
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .action-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .action-field label {
+            font-size: .72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .action-field input {
+            width: 70px;
+            padding: 8px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: .9rem;
+            text-align: center;
+        }
+
+        /* Log */
+        #log {
+            height: 180px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: .78rem;
+            line-height: 1.55;
+            background: var(--surface-2);
+            border-radius: 6px;
+            padding: 12px;
+            color: var(--muted);
+        }
+
+        #log .rx {
+            color: var(--green);
+        }
+
+        #log .tx {
+            color: var(--accent);
+        }
+
+        #log .err {
+            color: var(--red);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>♠ BLUFF ROYAL</h1>
+    <p class="subtitle">Client de test — ouvrez plusieurs onglets pour simuler une partie</p>
+
+    <!-- ═══ Connection ═══ -->
+    <div id="connection-panel" class="panel">
+        <div class="panel-title">Connexion</div>
+        <label for="inp-game-id">Game ID (UUID)</label>
+        <input id="inp-game-id" value="00000000-0000-4000-8000-000000000001" />
+        <label for="inp-pseudo">Pseudo</label>
+        <input id="inp-pseudo" placeholder="Ex: Alice" />
+        <br /><br />
+        <button class="btn btn-primary" id="btn-connect" onclick="doConnect()">Se connecter</button>
+    </div>
+
+    <!-- ═══ Game Area ═══ -->
+    <div id="game-area">
+
+        <!-- Info -->
+        <div class="panel">
+            <div class="panel-title">Infos de la partie</div>
+            <div class="info-bar">
+                <span class="info-chip">Phase : <b id="info-phase">—</b></span>
+                <span class="info-chip">Joueur actif : <b id="info-active">—</b></span>
+                <span class="info-chip timer" id="timer-chip" style="display:none;">⏱ <b id="info-timer">3</b>s</span>
+                <span class="info-chip">Joueurs : <b id="info-player-count">0</b></span>
+            </div>
+        </div>
+
+        <!-- Table center -->
+        <div class="panel">
+            <div class="panel-title">Centre de la table</div>
+            <div class="table-center" id="table-center">
+                <span class="no-trick">Aucune carte posée</span>
+            </div>
+        </div>
+
+        <!-- Hand -->
+        <div class="panel">
+            <div class="panel-title">Ma Main (<span id="hand-count">0</span> cartes)</div>
+            <div class="hand-grid" id="hand-grid">
+                <span class="empty-hand">Aucune carte</span>
+            </div>
+        </div>
+
+        <!-- Start game -->
+        <div class="panel" id="panel-start">
+            <div class="panel-title">Lobby</div>
+            <p style="color:var(--muted);font-size:.88rem;margin-bottom:12px;">En attente de joueurs… Ouvrez d'autres
+                onglets puis cliquez pour lancer.</p>
+            <button class="btn btn-primary" onclick="doStartGame()">🚀 Lancer la partie</button>
+        </div>
+
+        <!-- Actions -->
+        <div class="panel" id="panel-actions" style="display:none;">
+            <div class="panel-title">Actions</div>
+            <div class="actions-row">
+                <div class="action-field">
+                    <label>Quantité</label>
+                    <input id="inp-claim-qty" type="number" min="1" value="1" />
+                </div>
+                <div class="action-field">
+                    <label>Valeur (3-15)</label>
+                    <input id="inp-claim-val" type="number" min="3" max="15" value="3" />
+                </div>
+                <button class="btn btn-success" onclick="doPlayCards()">▶ Jouer</button>
+                <button class="btn btn-danger" id="btn-bluff" onclick="doCallBluff()" disabled>🤥 Tu mens !</button>
+                <button class="btn btn-gold" id="btn-carre" onclick="doCloseCarre()" disabled>🔒 Fermer le
+                    Carré</button>
+                <button class="btn btn-muted" onclick="doPass()">⏭ Passer</button>
+            </div>
+        </div>
+        <!-- Log -->
+        <div class="panel">
+            <div class="panel-title">Console</div>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // ════════════════════════════════════════════
+        //  State
+        // ════════════════════════════════════════════
+        let ws = null;
+        let playerId = null;
+        let gameId = null;
+        let gameState = null;
+        let selectedCards = [];   // indices in hand
+        let countdownInterval = null;
+
+        const SUIT_SYMBOLS = { Coeur: '♥', Carreau: '♦', Trefle: '♣', Pique: '♠' };
+        const VALUE_LABELS = { 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10', 11: 'V', 12: 'D', 13: 'R', 14: 'A', 15: '2' };
+
+        // ════════════════════════════════════════════
+        //  Helpers
+        // ════════════════════════════════════════════
+        function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+
+        function log(msg, cls = '') {
+            const el = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            el.innerHTML += `<div class="${cls}">[${time}] ${msg}</div>`;
+            el.scrollTop = el.scrollHeight;
+            console.log(`[${cls || 'info'}]`, msg);
+        }
+
+        // ════════════════════════════════════════════
+        //  Connection
+        // ════════════════════════════════════════════
+        function doConnect() {
+            gameId = document.getElementById('inp-game-id').value.trim();
+            const pseudo = document.getElementById('inp-pseudo').value.trim() || 'Anon';
+            playerId = uuidv4();
+
+            if (!gameId) { alert('Entrez un Game ID'); return; }
+
+            log(`Connexion en cours… game=${gameId}  player=${playerId}`, 'tx');
+
+            ws = new WebSocket(`ws://localhost:8000/ws/${gameId}/${playerId}`);
+
+            ws.onopen = () => {
+                log('✅ Connecté au serveur', 'rx');
+                document.getElementById('connection-panel').style.display = 'none';
+                document.getElementById('game-area').style.display = 'block';
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                log('⬇ Message reçu : ' + JSON.stringify(data).slice(0, 200), 'rx');
+
+                // If it has game_id and players → it's a GameState
+                if (data.game_id && data.players !== undefined) {
+                    gameState = data;
+                    renderGameState();
+                }
+                // Personal message (ack / error)
+                else if (data.type === 'error') {
+                    log('❌ Erreur : ' + data.message, 'err');
+                }
+                else if (data.type === 'ack') {
+                    log('✔ ' + data.message, 'rx');
+                }
+            };
+
+            ws.onclose = (e) => {
+                log(`🔌 Déconnecté (code ${e.code} — ${e.reason || 'aucune raison'})`, 'err');
+            };
+
+            ws.onerror = () => {
+                log('❌ Erreur WebSocket', 'err');
+            };
+        }
+
+        // ════════════════════════════════════════════
+        //  Rendering
+        // ════════════════════════════════════════════
+        function renderGameState() {
+            if (!gameState) return;
+
+            // Phase
+            document.getElementById('info-phase').textContent = gameState.phase;
+            document.getElementById('info-player-count').textContent = gameState.players.length;
+
+            // Active player
+            const activePlayer = gameState.players.find(p => p.id === gameState.active_player_id);
+            const isMyTurn = gameState.active_player_id === playerId;
+            document.getElementById('info-active').textContent =
+                activePlayer ? `${activePlayer.pseudo}${isMyTurn ? ' (TOI)' : ''}` : '—';
+
+            // Reaction window → countdown
+            const isReaction = gameState.phase === 'ReactionWindow';
+            handleCountdown(isReaction);
+
+            // Show/hide panels based on phase
+            const isWaiting = gameState.phase === 'WaitingForPlayers';
+            document.getElementById('panel-start').style.display = isWaiting ? '' : 'none';
+            document.getElementById('panel-actions').style.display = isWaiting ? 'none' : '';
+
+            // Bluff / Carré buttons
+            document.getElementById('btn-bluff').disabled = !isReaction;
+            document.getElementById('btn-carre').disabled = !isReaction;
+
+            // ── Table center ──
+            const tableEl = document.getElementById('table-center');
+            const trickCount = gameState.current_trick ? gameState.current_trick.length : 0;
+            const claim = gameState.current_claim;
+
+            if (trickCount === 0 && !claim) {
+                tableEl.innerHTML = '<span class="no-trick">Aucune carte posée</span>';
+            } else {
+                let html = '<div class="face-down-stack">';
+                for (let i = 0; i < trickCount; i++) {
+                    html += '<div class="face-down-card"></div>';
+                }
+                html += '</div>';
+                if (claim) {
+                    html += `<div class="claim-badge">Annonce : <b>${claim.quantity} × ${VALUE_LABELS[claim.value] || claim.value}</b></div>`;
+                }
+                tableEl.innerHTML = html;
+            }
+
+            // ── My hand ──
+            const me = gameState.players.find(p => p.id === playerId);
+            const handEl = document.getElementById('hand-grid');
+            const handCountEl = document.getElementById('hand-count');
+
+            if (!me || me.hand.length === 0) {
+                handEl.innerHTML = '<span class="empty-hand">Aucune carte</span>';
+                handCountEl.textContent = '0';
+                selectedCards = [];
+            } else {
+                handCountEl.textContent = me.hand.length;
+                // Keep selection indices that are still valid
+                selectedCards = selectedCards.filter(i => i < me.hand.length);
+
+                let html = '';
+                me.hand.forEach((card, idx) => {
+                    const isRed = card.suit === 'Coeur' || card.suit === 'Carreau';
+                    const sel = selectedCards.includes(idx) ? 'selected' : '';
+                    html += `
+        <div class="card ${isRed ? 'red' : 'black'} ${sel}" onclick="toggleCard(${idx})">
+          <span class="card-value">${VALUE_LABELS[card.value] || card.value}</span>
+          <span class="card-suit">${SUIT_SYMBOLS[card.suit] || card.suit}</span>
+        </div>`;
+                });
+                handEl.innerHTML = html;
+            }
+        }
+
+        // ── Countdown ──
+        function handleCountdown(active) {
+            const chip = document.getElementById('timer-chip');
+            const timerEl = document.getElementById('info-timer');
+
+            if (active && !countdownInterval) {
+                chip.style.display = '';
+                let remaining = 3;
+                timerEl.textContent = remaining;
+                countdownInterval = setInterval(() => {
+                    remaining--;
+                    timerEl.textContent = Math.max(remaining, 0);
+                    if (remaining <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownInterval = null;
+                    }
+                }, 1000);
+            } else if (!active) {
+                chip.style.display = 'none';
+                if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+            }
+        }
+
+        // ════════════════════════════════════════════
+        //  Card Selection
+        // ════════════════════════════════════════════
+        function toggleCard(idx) {
+            const pos = selectedCards.indexOf(idx);
+            if (pos === -1) selectedCards.push(idx);
+            else selectedCards.splice(pos, 1);
+            renderGameState();
+        }
+
+        // ════════════════════════════════════════════
+        //  Actions → WebSocket
+        // ════════════════════════════════════════════
+        function send(payload) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ Non connecté', 'err');
+                return;
+            }
+            log('⬆ Envoi : ' + JSON.stringify(payload), 'tx');
+            ws.send(JSON.stringify(payload));
+        }
+
+        function doPlayCards() {
+            if (!gameState) return;
+            const me = gameState.players.find(p => p.id === playerId);
+            if (!me) { log('❌ Joueur introuvable dans le GameState', 'err'); return; }
+
+            if (selectedCards.length === 0) {
+                log('⚠ Sélectionne au moins une carte', 'err');
+                return;
+            }
+
+            const cards = selectedCards.map(i => me.hand[i]);
+            const quantity = parseInt(document.getElementById('inp-claim-qty').value) || 1;
+            const value = parseInt(document.getElementById('inp-claim-val').value) || 3;
+
+            send({
+                action: 'play_cards',
+                cards: cards,
+                claim: { quantity, value }
+            });
+
+            selectedCards = [];
+        }
+
+        function doCallBluff() {
+            send({ action: 'call_bluff' });
+        }
+
+        function doCloseCarre() {
+            // Fermer le carré = action spéciale, à implémenter côté backend
+            send({ action: 'close_carre' });
+        }
+
+        function doStartGame() {
+            send({ action: 'start_game' });
+        }
+
+        function doPass() {
+            send({ action: 'pass' });
+        }
+    </script>
+
+</body>
+
+</html>
